@@ -1,0 +1,112 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2707
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Interthread communication by wait, notify, notify all method\
+Deadlock, a lock without key\
+Multithreading enhancements-realtime thread lock, thread group, thread local, executor framework\
+\
+Process based multitasking is independent process each task, suitable at os level\
+Thread based multitasking is used at program level, executing several task simultaneously in a single process\
+\
+Main thread or main method runs child thread and child thread runs the job inside run method.\
+Thread scheduler is part of jvm which takes care of scheduling thread operations when multiple threads are running in the same process. It varies from jvm  to jvm .\
+Threadobj.start() spawns a new thread and runs overridden run method, while threadobj.run() will just execute the method normally in the current calling thread.\
+Thread class start methods, registers thread with thread scheduler, perform mandatory activities, invoke run(). Without using this method one can\'92t start a new thread. This method also known as heart of multithreading.\
+Run method can also be overloaded but thread.start() will always call non argument run method.\
+Not overriding run method then thread class run method will be used and hence no use of threading there/\
+Restarting same thread gives illegal thread state exception.\
+\
+Thread can also be defined by implementing runnable interface. Implement runnable, override run, create thread obj , pass runnable to thread obj then start thread using thread, start.\
+Implements runnable is recommended way to create threads because if we extend thread class and create thread then we can\'92t extend any other class\
+Thread.currentThread(), current running thread information.\
+Thread priority is between 1 to 10, min to max. These priorities are used by thread scheduler to allocate resources. If two threads have same priority then exact execution order is ambiguous, it depends on thread scheduler. Default priority for main thread is 5, rest of the threads will inherit priority from parent thread(so basically if thread created in main then priority will be 5 for created thread).\
+Some platforms/OS won\'92t provide support for thread priorities.\
+\
+We can control thread runtime by using yield(), join() and sleep() method.\
+Yield() gives allows current e xecuting thread to give chance to execute for waiting threads having same priority(no guarantee of order of execution). If there are no waiting threads or every thread is low priority then same thread can continue execution. After yielding the last executing thread moves to ready state, execution again when is unexpected and depends on scheduler. It is generally used inside threads which are time taking\
+Public static native void slepp(), here native means method implemented in non java(basically underlying platform or os method).\
+As soon as a thread calls join on other thread then join caller moves to waiting state and waits for the other thread to complete.\
+Every join method throws interrupted exception which is checked exception, hence exception handling required.\
+thread.sleep(), suspends thread for a while\
+\
+static Thread thread=Thread.currentThread(), this will point reference to current thread, this can be used in other thread so that methods like join can be used.\
+Deadlock situation is where two threads wait infinitely wait for each other, for instance child thread waiting fro main using join and simultaneously main thread waiting for child using join. Other way is thread calling join method on itself.\
+Every sleep method throws interrupted exception.\
+A thread can interrupt a sleeping thread or waiting thread by using interrupt method on the thread obj\
+\
+Synchronised modifier is applicable for methods and block. Synchronisation resolves data inconsistency, basically multiple threads accessing data at the same time. Synchronisation enables execution on data by only one thread at a time. Synchronisation disadvantage increases waiting time of the thread.\
+Internally synchronisation is implemented by java\'92s lock concept.\
+Every obj in Java has a unique lock, this is taken care by jvm acquiring and releasing lock.\
+And lock concept is only for obj.\
+Suppose three methods accessing an obj, two are synchronised but third is not. First two would be able to access obj in synchrionized manner i.e. one will finish execution then second while third will be able to use obj independently.\
+Obj resides in two areas, synchronised and non synchronised areas. Synchronised can be accessed by only one thread at time while non synchronised can be accessed by multiple threads.\
+Ensure to perform update operation in synchronised area.\
+Suppose three different thread objects accessing same synchronised non static method then output is irregular but in case of static methods output is regular. Because for static synchronised methods class level lock is required\
+\
+Synchronised block is used within a method when we want a part of the method to be synchronised not all. This by default improves perfromance.\
+synchronized(classname.class), this will be block at class level. This block is applicable for obj type and class type\
+Synchronised keywords cause performance issues when used incorrectly\
+Data inconsistency issues when multiple threads are operating the same resource is called race condition\
+Thread can acquire multiple locks simultaneously from different objects.\
+Synchronised statements are lines present inside synchronised method or blocks\
+\
+Two threads can communicate with each other by using wait, notify and notifyAll methods.\
+The thread which is expecting updation is responsible to call wait method then immediately the thread will enter into waiting state. The thread which is responsible to perorm updation. After performing updation it is responsible to call notify method then waiting thread will get that notification and continue its execution with those updated items. These methods are present in Object class.\
+Thread should be owner of object when it calls for wait/notify/notify all methods. Basically lock on the object. So in turn this call can be made only from synchronised area.\
+If thread calls wait method on any object it immediately releases lock of the particular object and enters into waiting state.\
+Wait, notify and notifyAll methods should only be called from synchronised area otherwise illegalMonitorStateException.\
+Except wait, notify, notify all method thread does not release lock anywhere for any other method.\
+If a thread calls notify method on any obj it releases lock of that object but may not immediately.\
+If thread calls wait method on any obj then it immediately releases lock of the particular obj then enters into waiting state.\
+If a thread is in waiting state and wait gets over by notify or time is up then it goes to another waiting state to get lock and then to ready state to get the resources allocated to move into running state. Basically any thread which goes out of running state can never come to running state directly.\
+Calling sleep method in one thread to wait for completion in other thread is not a good practice because we can not be sure of how much time the other thread is going to take.\
+When using wait and notify if wait is in main and child thread is given chance first to run and it finishes execution then main thread will be forever waiting for notification. This issue can be solved by specifying wait duration.\
+It depends on jvm which thread will be notified when notify is used.\
+Even when notify all is used the same lifecycle as notify is followed I.e from suspend to wait state and wait for acquiring locks to start execution.\
+On which obj we are calling the wait method the current thread should have lock of that object else if still using wait then illegalmonitorstate exception.\
+\
+Two threads waiting for each other infinitely then it is called deadlock. This situation is introduced by synchronised keyword.\
+Long waiting of a thread where waiting ends at certain point is called starvation. Low priority thread has to wait until completing all high priority threads.\
+\
+Thread which executes in the background is called daemon thread. Main purpose of these threads is to provide support to non demon threads. These threads usually run on low priorities but when needed jvm increases priority to high.\
+We can daemon nature of a thread by using isDaemon method of thread class. We can change daemon nature of thread by using setDaemon method, and ensure to change it before thread starts else illegalthrewadstateexception.\
+By default main thread is always non-daemon but for non main threads the nature is inherited from parent to child.\
+It is not possible to change nature of main thread since jvm starts it before control comes to programmer.\
+Whenever last non daemon terminates automatically all daemon threads will be terminated.\
+\
+ Green thread model is a thread which is managed completely managed by JVM only, without taking any underlying OS support is called green thread. THIS is not supported by most of the operating systems, kinda deprecated.\
+\
+Native OS models basically thread managed by JVM and OS support\
+\
+Concurrency:\
+\
+Threadgroup is group of common performing threads. It also has concept of subthread.\
+Every thread group is child group of System group\
+Default priority for thread group is 10.\
+Suppose a thread group has max priority 5 then we change it to 3 then all the existing thread in thread group will have the same old priority but new threads will have 3 priority.\
+Some system threads are, reference handler, finaliser, Signal dispatcher, attach listener.\
+\
+Problems with traditional synchronised keyword: we are not having any flexibility to try for a lock without waiting, there is no way to specify maximum waiting time for a thread to get lock so that thread will wait until getting the lock which may create performance issue/deadlock, if a thread releases a lock then which waiting thread will get that lock we are not having any control on this, there is no api to list out all waiting threads for a lock, synchronise keyword can only be used waiting method or at method level and it\'92s not possible to use across multiple methods.\
+To overcome above problems sun introduced lock package in 1.5. it also provides several enhancements to the programmer to provide more control on concurrency.\
+Using unlock on a thread you need to have a lock on it before unlocking else illegalstatemonitor exception.\
+\
+Reentrant lock is implementation class of lock interface and direct child class of object class. Reentrant means a thread can acquire same lock multiple times/o any issue. Internally reentrant lock increments threads personal count whenever we call lock method and decrements count value whenever thread calls unlock method and lock will be released whenever count reaches zero.\
+\
+Creating a new thread for every job may create performance and memory problems to overcome this we should go for thread pools. ThreadPool is pool of already created threads ready to do our job. Java 1.5 version introduces thread pool framework to implement thread pools. This framework is also known as executor framework.\
+Create executor service obj, pass a runnable to it.\
+If we wish to return something after thread execution, implement Callable and override call method.\
+Future is used to hold the return type from callable when callable job is submitted using executor.\
+\
+ThreadLocal is used to define thread scope. It is kind of box for common attributes among multiple threads. So let us just say 4 threads have 4 different variable of same type count.\
+ThreadLocal class provides threadLocal variables. ThreadLocal class maintains value per thread basis. Each thread local object maintains a separate value like user id, transaction id etc. for each thread that accesses that object.\
+Thread can access its local value, can manipulate its value and even can remove its value. In every part go the code which is executed by the thread we can access its local variable. Consider a servlet which invokes some business methods, we have a requirement to generate unique transaction for each and every request and we have to pass this transaction id to business methods. For this requirement we can use thread local to maintain a separate transaction id for every request that is for every thread.\
+Thread local can be used  to define thread scope variable i.e. wherever this thread is there this data should be there.\
+Threadlocal can be associated with thread scope. Total code which is executed by the thread has access to corresponding thread local variable. A thread can access its own local variable and can\'92t access other threads local variables.\
+Once thread entered into dead state, all its local variable are by default eligible for garbage collection.\
+Overriding of initial value method in threadLocal can be done by overriding the initial value method when creating an object for thread local by making use of anonymous class concept. \
+One thread value is not available to other thread even if they call the thread local variable reset in one thread.\
+If we want to bypass above then make use of InheritableThreadLocal. By doing so the value will be same for all access from other methods, if we want it to be different then override childValue method of inheritablethreadlocal while instantiating by making use of anonymous class}
